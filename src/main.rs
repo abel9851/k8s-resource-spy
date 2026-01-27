@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 
 fn main() {
-    let cpu_max_path = "/sys/fs/cgroup/cpu.pax";
+    let cpu_max_path = "/sys/fs/cgroup/cpu.max";
     println!("---performance Spy---");
 
     if Path::new(cpu_max_path).exists() {
