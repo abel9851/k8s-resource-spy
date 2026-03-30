@@ -24,3 +24,7 @@ target
 # Added by cargo
 
 /target
+.aider*
+
+# Personal learning materials and strategy docs
+memo/
