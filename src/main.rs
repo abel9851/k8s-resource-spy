@@ -1,33 +1,25 @@
-use std::fs;
-use std::path::Path;
+// src/main.rs
+// GPU Inference Proxy - Foundation
+
+use k8s_resource_spy::gpu_metrics::{GpuMetrics, AppleSiliconGpu};
 
 fn main() {
-    let cpu_max_path = "/sys/fs/cgroup/cpu.max";
-    println!("---performance Spy---");
+    println!("--- k8s-resource-spy: GPU Monitoring ---\n");
 
-    if Path::new(cpu_max_path).exists() {
-        match fs::read_to_string(cpu_max_path) {
-            Ok(content) => {
-                let parts: Vec<&str> = content.split_whitespace().collect();
-                if parts.len() >= 2 {
-                    let quota = parts[0];
-                    let period = parts[1];
+    // Single GPU test
+    let gpu = AppleSiliconGpu::new(0);
+    print_gpu_info(&gpu);
+    
+    // TODO: add multiple GPU cluster simulation
+    // TODO: implement least-loaded GPU selection for routing
+}
 
-                    println!("Quota: {}, Period: {}", quota, period);
-
-                    if quota != "max" {
-                        let q: f64 = quota.parse().unwrap_or(0.0);
-                        let p: f64 = period.parse().unwrap_or(100000.0);
-                        println!("Calculated Limit: {:.2} cores", q / p);
-                    } else {
-                        println!("Result: Unlimited (No Throttling risk)");
-                    }
-                }
-            }
-            Err(e) => println!("Error reading cgroup: {}", e),
-        }
-    } else {
-        println!("Status: Running on Local (Cgroup v2 not found)");
-        println!("Note: To test this, we need a Linux container environment");
-    }
+/// Print GPU metrics in formatted output
+fn print_gpu_info(gpu: &AppleSiliconGpu) {
+    println!("GPU: {}", gpu.name());
+    println!("  Utilization: {:.1}%", gpu.utilization());
+    println!("  Memory: {:.2} / {:.2} GB",
+        gpu.memory_used() as f64 / 1024.0 / 1024.0 / 1024.0,
+        gpu.memory_total() as f64 / 1024.0 / 1024.0 / 1024.0);
+    println!("  Temperature: {:.1}°C", gpu.temperature());
 }
